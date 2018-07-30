@@ -12,5 +12,22 @@
 */
 
 $router->get('/', function () use ($router) {
-    return $router->app->version();
+    return response()->json($router->app->version());
+});
+
+$router->group(['prefix' => 'v1'], function () use ($router) {
+    // GET index()
+    $router->get('/pokemon', 'PokemonController@index');
+
+    // POST store()
+    $router->post('/pokemon', 'PokemonController@store');
+
+    // GET $id show()
+    $router->get('/pokemon/{id:[\d]+}', 'PokemonController@show');
+
+    // PUT $id update()
+    $router->put('/pokemon/{id:[\d]+}', 'PokemonController@update');
+
+    // DELETE $id destroy()
+    $router->delete('/pokemon/{id:[\d]+}', 'PokemonController@destroy');
 });

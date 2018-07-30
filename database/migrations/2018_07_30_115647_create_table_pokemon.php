@@ -18,7 +18,7 @@ class CreateTablePokemon extends Migration
             $table->integer('number')->unique();
             $table->string('name');
             $table->string('description');
-            $table->string('url');
+            $table->string('url')->nullable();
             $table->timestamps();
         });
     }
