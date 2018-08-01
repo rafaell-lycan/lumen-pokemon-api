@@ -79,13 +79,6 @@ class Handler extends ExceptionHandler
                 'message' => $e->getMessage(),
             ]
         ], $rendered->status());
-
-        // return response()->json([
-        //     'error' => [
-        //         'code' => $rendered->getStatusCode(),
-        //         'message' => $e->getMessage(),
-        //     ]
-        // ]);
     }
 
     /**
