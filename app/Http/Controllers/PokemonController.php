@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Pokemon;
+use App\Transformers\PokemonTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -11,7 +12,8 @@ class PokemonController extends Controller
 
     public function index()
     {
-        return response()->json(Pokemon::all());
+        // return response()->json(Pokemon::all());
+        return $this->collection(Pokemon::all(), new PokemonTransformer());
     }
 
     public function store(Request $request)
@@ -19,7 +21,8 @@ class PokemonController extends Controller
         $this->validate($request, [
             'name' => 'required|max:255',
             'number' => 'required',
-            'description' => 'required'
+            'description' => 'required',
+            'url' => 'required'
         ],[
             'description.required' => 'Please fill out the :attribute.'
         ]);
@@ -28,21 +31,60 @@ class PokemonController extends Controller
             'url' => 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' . $request->number . '.png'
         ]);
 
-        return response()->json($pokemon, 201);
+        return response(
+            $this->item($pokemon, new PokemonTransformer()),
+            201
+        );
+
+        // return response()->json($pokemon, 201);
     }
 
     public function show($id)
     {
-        return response('show ' + $id);
+        // return $this->item(Pokemon::findOrFail($id), new PokemonTransformer());
+        return $this->item(Pokemon::where("number", $id)->firstOrFail(), new PokemonTransformer());
     }
 
     public function update(Request $request, $id)
     {
-        return response('update ' + $id);
+
+        try {
+            $pokemon = Pokemon::where("number", $id)->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'error' => [
+                    'message' => 'Pokémon not found. Consider adding it!'
+                ] ], 404);
+        }
+
+        $this->validate($request, [
+            'name' => 'required|max:255',
+            'number' => 'required',
+            'description' => 'required',
+            'url' => 'required'
+        ],[
+            'description.required' => 'Please fill out the :attribute.'
+        ]);
+
+        $pokemon->fill($request->all());
+        $pokemon->save();
+
+        return $this->item($pokemon, new PokemonTransformer());
     }
 
     public function destroy($id)
     {
-        return response('destroy ' + $id);
+        try {
+            $pokemon = Pokemon::findOrFail($id);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+            'error' => [
+                'message' => 'Pokémon not found. Consider adding it!'
+            ] ], 404);
+        }
+
+        $pokemon->delete();
+
+        return response(null, 204);
     }
 }

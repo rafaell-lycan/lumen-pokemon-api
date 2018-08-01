@@ -10,12 +10,7 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-
-$router->get('/', function () use ($router) {
-    return response()->json($router->app->version());
-});
-
-$router->group(['prefix' => 'v1'], function () use ($router) {
+$router->group(['prefix' => 'api/v1'], function () use ($router) {
     // GET index()
     $router->get('/pokemon', 'PokemonController@index');
 
@@ -30,4 +25,13 @@ $router->group(['prefix' => 'v1'], function () use ($router) {
 
     // DELETE $id destroy()
     $router->delete('/pokemon/{id:[\d]+}', 'PokemonController@destroy');
+
+    $router->get('/health', function () use ($router) {
+        return response()->json([
+            "status" => true,
+            "message" => "API Pokedex",
+            "version" => $router->app->version(),
+        ]);
+    });
+
 });
