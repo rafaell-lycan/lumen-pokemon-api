@@ -8,6 +8,7 @@ use League\Fractal\Resource\Collection;
 use League\Fractal\Resource\ResourceInterface;
 use League\Fractal\Serializer\SerializerAbstract;
 use Illuminate\Http\Request;
+use League\Fractal\Pagination\IlluminatePaginatorAdapter;
 
 class FractalResponse {
     /**
@@ -62,11 +63,15 @@ class FractalResponse {
      * @param null $resourceKey
      * @return array
      */
-    public function collection($data, TransformerAbstract $transformer, $resourceKey = null)
+    public function collection($data, TransformerAbstract $transformer, $resourceKey = null, $paginator = null)
     {
-        return $this->createDataArray(
-            new Collection($data, $transformer, $resourceKey)
-        );
+        $resource = new Collection($data, $transformer, $resourceKey);
+        $resource->setPaginator(new IlluminatePaginatorAdapter($paginator));
+
+        return $this->createDataArray($resource);
+        // return $this->createDataArray(
+        //     new Collection($data, $transformer, $resourceKey)
+        // );
     }
     /**
      * @param ResourceInterface $resource

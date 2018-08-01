@@ -31,8 +31,8 @@ class Controller extends BaseController
     * @param null $resourceKey
     * @return array
     */
-    public function collection($data, TransformerAbstract $transformer, $resourceKey = null)
+    public function collection($data, TransformerAbstract $transformer, $resourceKey = null, $paginator = null)
     {
-        return $this->fractal->collection($data, $transformer, $resourceKey);
+        return $this->fractal->collection($data, $transformer, $resourceKey, $paginator);
     }
 }

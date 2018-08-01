@@ -12,8 +12,8 @@ class PokemonController extends Controller
 
     public function index()
     {
-        // return response()->json(Pokemon::all());
-        return $this->collection(Pokemon::all(), new PokemonTransformer());
+        $paginator = Pokemon::paginate(20);
+        return $this->collection($paginator->getCollection(), new PokemonTransformer(), null, $paginator);
     }
 
     public function store(Request $request)
@@ -27,9 +27,7 @@ class PokemonController extends Controller
             'description.required' => 'Please fill out the :attribute.'
         ]);
 
-        $pokemon = Pokemon::create($request->all(), [
-            'url' => 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/' . $request->number . '.png'
-        ]);
+        $pokemon = Pokemon::create($request->all());
 
         return response(
             $this->item($pokemon, new PokemonTransformer()),
@@ -75,7 +73,7 @@ class PokemonController extends Controller
     public function destroy($id)
     {
         try {
-            $pokemon = Pokemon::findOrFail($id);
+            $pokemon = Pokemon::where("number", $id)->firstOrFail();
         } catch (ModelNotFoundException $e) {
             return response()->json([
             'error' => [
