@@ -8,6 +8,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Laravel\Lumen\Exceptions\Handler as ExceptionHandler;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Http\JsonResponse;
 
 class Handler extends ExceptionHandler
 {
@@ -45,31 +46,46 @@ class Handler extends ExceptionHandler
     */
     public function render($request, Exception $e)
     {
-        if ($request->wantsJson()) {
-            $response = [
-                'message' => (string) $e->getMessage(),
-                'status' => 400
-            ];
+        // if ($request->wantsJson()) {
+        //     $response = [
+        //         'message' => (string) $e->getMessage(),
+        //         'status' => 400
+        //     ];
 
-            if ($e instanceof HttpException) {
-                $response['message'] = Response::$statusTexts[$e->getStatusCode()];
-                $response['status'] = $e->getStatusCode();
-            } else if ($e instanceof ModelNotFoundException) {
-                $response['message'] = Response::$statusTexts[Response::HTTP_NOT_FOUND];
-                $response['status'] = Response::HTTP_NOT_FOUND;
-            }
+        //     if ($e instanceof HttpException) {
+        //         $response['message'] = Response::$statusTexts[$e->getStatusCode()];
+        //         $response['status'] = $e->getStatusCode();
+        //     } else if ($e instanceof ModelNotFoundException) {
+        //         $response['message'] = Response::$statusTexts[Response::HTTP_NOT_FOUND];
+        //         $response['status'] = Response::HTTP_NOT_FOUND;
+        //     }
 
-            if ($this->isDebugMode()) {
-                $response['debug'] = [
-                    'exception' => get_class($e),
-                    'trace' => $e->getTrace()
-                ];
-            }
+        //     if ($this->isDebugMode()) {
+        //         $response['debug'] = [
+        //             'exception' => get_class($e),
+        //             'trace' => $e->getTrace()
+        //         ];
+        //     }
 
-            return response()->json(['error' => $response], $response['status']);
-        }
+        //     return response()->json(['error' => $response], $response['status']);
+        // }
 
-        return parent::render($request, $e);
+        // return parent::render($request, $e);
+        $rendered = parent::render($request, $e);
+
+        return new JsonResponse([
+            'error' => [
+                'code' => $rendered->getStatusCode(),
+                'message' => $e->getMessage(),
+            ]
+        ], $rendered->status());
+
+        // return response()->json([
+        //     'error' => [
+        //         'code' => $rendered->getStatusCode(),
+        //         'message' => $e->getMessage(),
+        //     ]
+        // ]);
     }
 
     /**
